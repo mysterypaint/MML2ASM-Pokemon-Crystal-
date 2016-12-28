@@ -15,6 +15,4 @@ Some useful supplemental tools I recommend:
 http://forums.famitracker.com/viewtopic.php?t=610 (To write your music in FamiTracker and convert it to a readable MIDI, using Namco for the Wave Channel)
 https://github.com/loveemu/petitemm (To convert the MIDI to MML syntax)
 
-Special thanks:
-pigdevil2010: Provided info about pokecrystal disassembly's commands and GB noise bank reference
-sirocyl: Advice for tempo/rhythm algorithms
+Special thanks to pigdevil2010 for providing info about pokecrystal disassembly's commands and GB noise bank reference.
