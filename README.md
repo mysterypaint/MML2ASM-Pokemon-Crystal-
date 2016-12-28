@@ -1,12 +1,10 @@
 # MML2ASM-Pokemon-Crystal-
-Converts MML syntax to a syntax compatible with the pokecrystal disassembly
+Java tool which takes input Music Markup Language (MML) syntax and outputs a .asm file, making scripting custom music for Pokemon Crystal much easier. (Currently a WIP)
 
-Currently a WIP, this tool takes input Music Markup Language (MML) syntax and outputs a .asm file, making scripting custom music for Pokemon Crystal much easier.
+At the moment, the tool only converts note data, stereo panning, tempo, volume, and wave duty cycle changing for the pulse channels. The tool also ignores any comments indicated by a ";".
 
-At the moment, the tool only converts note data, stereo panning, tempo, volume, and wave duty cycle changing for the pulse channels. The tool also ignores any comments indicated by a ";"
-
-Useage: java -jar mml2asm.jar
-(Then, place your MML file as a .txt in the same directory as the .jar and type it in the program when it prompts you to)
+Useage: java -jar mml2asm.jar <file>.txt
+Place your .txt in the folder where you put the .jar. If you don't specify for a file, it'll add one itself. Also, it'll amend ".txt" to the file search argument if you didn't.
 
 Future plans:
 - Implement vibrato detection
