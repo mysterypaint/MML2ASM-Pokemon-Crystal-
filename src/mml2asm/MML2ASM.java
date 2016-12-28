@@ -2,9 +2,7 @@
 package mml2asm;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 import java.io.*;
@@ -14,12 +12,10 @@ public class MML2ASM
 	//Initialize some music data variables
 	public static String definedLabel = "";
 	public static int loopCount = 0;
-	public static boolean loopMode = false;
-	public static Map<String, Loop> map = new HashMap<String, Loop>();
-	public static Channel ChA = new Channel();
-	public static Channel ChB = new Channel();
-	public static Channel ChC = new Channel();
-	public static Channel ChD = new Channel();
+	public static Channel ChA = new Channel("ChA");
+	public static Channel ChB = new Channel("ChB");
+	public static Channel ChC = new Channel("ChC");
+	public static Channel ChD = new Channel("ChD");
     public static List<String> outputBank = new ArrayList<String>();
     public static int currentOctave = 4;	//Default octave starts at 4 (1 through 8)
     public static int previousOctave = 4;	//Keep track of the previously-changed octave
@@ -31,17 +27,15 @@ public class MML2ASM
     public static boolean usingChC = false;
     public static boolean usingChD = false;
 	public static String songName = "Untitled";
-	public static boolean loopA = false;
-	public static boolean loopB = false;
-	public static boolean loopC = false;
-	public static boolean loopD = false;
+	public static boolean loopSongA = false;
+	public static boolean loopSongB = false;
+	public static boolean loopSongC = false;
+	public static boolean loopSongD = false;
 	public static boolean noLoop = false;
 	public static int firstChanInHeader = 1;
 
 	public static void main(String [] args)
 		{
-			
-		
 			// Create an input scanner for keyboard
 			Scanner stdIn = new Scanner(System.in);
 			// The name of the file to open.
@@ -167,13 +161,13 @@ public class MML2ASM
 				
 				if (usingChA)
 				{
-					if (ChA.getListSize()>0)
+					if (ChA.getChannelDataSize()>0)
 					{
 					outputBank.add("\n\nMusic_" + songName + "_Ch1: ; Channel A (Pulse 1)");
 					outputBank.add(ChA.toString());
 					}
 					
-					if (loopA)
+					if (loopSongA)
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_LoopStart_Ch1");
 					}
@@ -185,17 +179,23 @@ public class MML2ASM
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_Ch1");
 					}
+
+					if (ChA.getLoopDataSize()>0)
+					{
+					outputBank.add("\n\n;Loop Defines for Channel A (Pulse 1)");
+					outputBank.add("\n" + ChA.loopToString());
+					}
 				}
 				
 				if (usingChB)
 				{
-					if (ChB.getListSize()>0)
+					if (ChB.getChannelDataSize()>0)
 					{
 					outputBank.add("\n\nMusic_" + songName + "_Ch2: ; Channel B (Pulse 2)");
 					outputBank.add(ChB.toString());
 					}
 					
-					if (loopB)
+					if (loopSongB)
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_LoopStart_Ch2");
 					}
@@ -207,17 +207,22 @@ public class MML2ASM
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_Ch2");
 					}
+					if (ChB.getLoopDataSize()>0)
+					{
+					outputBank.add("\n\n;Loop Defines for Channel B (Pulse 2)");
+					outputBank.add("\n" + ChB.loopToString());
+					}
 				}
 				
 				if (usingChC)
 				{
-					if (ChC.getListSize()>0)
+					if (ChC.getChannelDataSize()>0)
 					{
 					outputBank.add("\n\nMusic_" + songName + "_Ch3: ; Channel C (Wave)");
 					outputBank.add(ChC.toString());
 					}
 		
-					if (loopC)
+					if (loopSongC)
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_LoopStart_Ch3");
 					}
@@ -229,17 +234,22 @@ public class MML2ASM
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_Ch3");
 					}
+					if (ChC.getLoopDataSize()>0)
+					{
+					outputBank.add("\n\n;Loop Defines for Channel C (Wave)");
+					outputBank.add("\n" + ChC.loopToString());
+					}
 				}
 				
 				if (usingChD)
 				{
-					if (ChD.getListSize()>0)
+					if (ChD.getChannelDataSize()>0)
 					{
 					outputBank.add("\n\nMusic_" + songName + "_Ch4: ; Channel D (White Noise)");
 					outputBank.add(ChD.toString());
 					}
 					
-					if (loopD)
+					if (loopSongD)
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_LoopStart_Ch4");
 					}
@@ -251,18 +261,12 @@ public class MML2ASM
 					{
 						outputBank.add("\n\tloopchannel 0, Music_" + songName + "_Ch4");
 					}
+					if (ChD.getLoopDataSize()>0)
+					{
+					outputBank.add("\n\n;Loop Defines for Channel D (White Noise)");
+					outputBank.add("\n" + ChD.loopToString());
+					}
 				}
-				
-				//Now, add all the loops we had to the very bottom of the page
-				outputBank.add("\n\n;Loop Defines");
-				
-				for (String i : map.keySet())
-				{
-					outputBank.add("\nMusic_" + songName + "_branch_" + map.get(i).getName() + ":");
-					outputBank.add(map.get(i).toString());
-				}
-				
-				
 				
 				//Then, write all the combined data into the actual .txt
 				int q=0;
@@ -285,12 +289,8 @@ public class MML2ASM
 		public static void parseText(Scanner reader)
 		{
 			String parsedLine = null;
-			ChA.add("\n\toctave 4");
-			ChB.add("\n\toctave 4");
-			ChC.add("\n\toctave 4");
-			ChD.add("\n\toctave 4");
 			boolean checkedTitle = false;
-			
+			boolean endReading = false;
 			while(reader.hasNextLine())
 			{
 				//Disable all channels every line before deeming them relevant to the line
@@ -301,8 +301,13 @@ public class MML2ASM
 				
 				//Get the current line and start reading it
 				parsedLine = reader.nextLine();
-				while (parsedLine.equals(""))
-				{parsedLine = reader.nextLine();currentFileLine++;}
+				
+				//Skip all lines that are entirely empty/nothing but spaces
+				while (parsedLine.replaceAll("\\s", "").equals(""))
+				{
+				if (!reader.hasNextLine()){endReading=true; break;}
+				parsedLine = reader.nextLine();currentFileLine++;}
+				if (endReading){break;}
 				
 				if (songName.equals("Untitled") && !checkedTitle)
 				{
@@ -325,21 +330,21 @@ public class MML2ASM
 				int k=0;
 				if (parsedLine.replaceAll("\\s", "").charAt(0)!=';')
 				{
-					while (parsedLine.charAt(k)!=' ' && k<=parsedLine.length())
+					while (parsedLine.trim().charAt(k)!=' ' && k<=parsedLine.length())
 					{
-						switch(parsedLine.toUpperCase().charAt(k))
+						switch(parsedLine.trim().toUpperCase().charAt(k))
 						{
 						case 'A':
-							ChA.setChannelEnabled(true);
+							ChA.setChannelEnabled(true); usingChA=true;
 							break;
 						case 'B':
-							ChB.setChannelEnabled(true);
+							ChB.setChannelEnabled(true); usingChB=true;
 							break;
 						case 'C':
-							ChC.setChannelEnabled(true);
+							ChC.setChannelEnabled(true); usingChC=true;
 							break;
 						case 'D':
-							ChD.setChannelEnabled(true);
+							ChD.setChannelEnabled(true); usingChD=true;
 							break;
 						case ';':
 							break; //Ignore all commented lines
@@ -349,17 +354,12 @@ public class MML2ASM
 						k++;
 					}
 			
-
-
 				//If we have any channel declaration, find out what it was so we can determine how many characters to skip
 				String chanDec = null;
 				if (ChA.getChannelEnabled()||ChB.getChannelEnabled()||ChC.getChannelEnabled()||ChD.getChannelEnabled())
 				{
-					if(parsedLine.contains(" ")){
-						chanDec = parsedLine.substring(0, parsedLine.indexOf(" ")); 
-					}
+					chanDec = parsedLine.trim().substring(0, parsedLine.indexOf(" "));
 				}
-
 				//Remove all spaces from the parsed line before we actually start reading it
 				parsedLine = parsedLine.replaceAll("\\s","");
 
@@ -434,13 +434,13 @@ public class MML2ASM
 							i += amendCommand(parsedLine, i) -1;
 							break;
 						case '(':
-							i = 1 + defineMacro(parsedLine, i, reader, 2);
+							i = defineMacro(parsedLine, i, reader, 2);
 							break;
 						case '[':
 							i = defineMacro(parsedLine, i, reader, 1);
 							break;
 						case ']':
-							loopMode=false;
+							i = handleLoopEnd(parsedLine, i);
 							break;
 						case '>':
 							shiftOctave('>', parsedLine, i);
@@ -469,76 +469,46 @@ public class MML2ASM
 		}
 		}
 		
+		public static int handleLoopEnd(String parsedLine, int i)
+		{
+		ChA.setLoopMode(false);
+		ChB.setLoopMode(false);
+		ChC.setLoopMode(false);
+		ChD.setLoopMode(false);
+		
+		try
+		{
+			System.out.println(parsedLine.charAt(i+1));
+		}
+		catch(StringIndexOutOfBoundsException e)
+		{
+			System.out.println("No Loop.");
+		}
+		
+		return i;
+		}
+
 		public static int defineMacro(String parsedLine, int i, Scanner reader, int dataType)
 		{
-			//dataType 1 = standard loop
-			//dataType 2 = defined loop
-			definedLabel = "";
-			i++;
+			/*
+			case '(':
+				i = defineMacro(parsedLine, i, reader, 2);
+			case '[':
+				i = defineMacro(parsedLine, i, reader, 1);
+			 */
 			
-			while (parsedLine.charAt(i)!=')')
-				{
-					definedLabel+=parsedLine.charAt(i);
-					if (i<parsedLine.length()-1)
-					{i++;}
-				}
-			
-			String numOfLoops="";
-			String getLabel = "";
-			
-			//Check if the define already exists		
-			if (!map.containsKey(definedLabel))
+			if (dataType==1)
 			{
-				if (!loopMode)
-				{
-					loopCount++;
-					map.put(definedLabel, new Loop(definedLabel));
-					chanWrite("\nbranch_" + map.get(definedLabel).getName() + ":");
-					chanWrite("\n\tcallchannel " + "branch_" + map.get(definedLabel).getName());
-					loopMode=true;
-				}
-				else
-				{
-					System.out.println("Aborting to prevent potential memory leak: Make sure your label loops are valid!");
-					reader.close();
-					System.exit(0);
-				}
+				//case '['
+				ChA.setMacroLoopStart();
+				ChB.setMacroLoopStart();
+				ChC.setMacroLoopStart();
+				ChD.setMacroLoopStart();
 			}
-			else
+			else if (dataType==2)
 			{
-				//Define the loop if it doesn't exist. Crash if it runs into another loop define.
-				
-				loopMode=false;
-				i++;
-				
-				if (parsedLine.charAt(i)>='0' && parsedLine.charAt(i)<='9')
-				{
-					while (parsedLine.charAt(i)>='0' && parsedLine.charAt(i)<='9')
-					{
-						numOfLoops+=parsedLine.charAt(i);
-						if (i<parsedLine.length()-2)
-						{i++;}
-						else{break;}
-					}
-				}
-				else{numOfLoops="0";}
-
-				if (Integer.parseInt(numOfLoops)>=1)
-				{
-					map.get(definedLabel).incLoopCount();
-					getLabel = "Music_" + songName + "_branch_" + definedLabel + "_Loop_" + map.get(definedLabel).getLoopCount();
-					chanWrite("\n" + getLabel + ":");
-				}
+				//case '('
 			}
-			
-			
-			
-			
-			
-			getLabel = "Music_" + songName + "_branch_" + definedLabel + "_Loop_" + map.get(definedLabel).getLoopCount();
-			
-			chanWrite("\n\tcallchannel Music_" + songName + "_branch_" + map.get(definedLabel).getName());
-			chanWrite("\n\tloopchannel " + numOfLoops + ", " + getLabel);
 			
 			return i;
 		}
@@ -744,87 +714,10 @@ public class MML2ASM
 		
 		public static void setOctave(int currentOctave)
 		{
-			boolean doNotWrite=false;
-			//For each relevant channel, check if we have any redundant octave declarations for output code cleanup. 
-			if (ChA.getChannelEnabled())
-			{
-				try{
-					if (ChA.get(ChA.getListSize()-1).substring(1, ChA.get(ChA.getListSize()-1).length()-1).equals("	octave "))
-					{
-						ChA.remove(ChA.getListSize()-1);
-					}
-					else if (ChA.get(ChA.getListSize()-1).substring(1, ChA.get(ChA.getListSize()-1).length()-1).equals("	note __"))
-					{
-						doNotWrite=true;
-					}
-				}
-				catch (ArrayIndexOutOfBoundsException e)
-				{
-					//Do nothing
-				}
-			}
-			
-
-			if (ChB.getChannelEnabled())
-			{
-				try{
-					if (ChB.get(ChB.getListSize()-1).substring(1, ChB.get(ChB.getListSize()-1).length()-1).equals("	octave "))
-					{
-						ChB.remove(ChB.getListSize()-1);
-					}
-					else if (ChB.get(ChB.getListSize()-1).substring(1, ChB.get(ChB.getListSize()-1).length()-1).equals("	note __"))
-					{
-						doNotWrite=true;
-					}
-				}
-				catch (ArrayIndexOutOfBoundsException e)
-				{
-					//Do nothing
-				}
-			}
-			
-
-			if (ChC.getChannelEnabled())
-			{
-				try{
-					if (ChC.get(ChC.getListSize()-1).substring(1, ChC.get(ChC.getListSize()-1).length()-1).equals("	octave "))
-					{
-						ChC.remove(ChC.getListSize()-1);
-					}
-					else if (ChC.get(ChC.getListSize()-1).substring(1, ChC.get(ChC.getListSize()-1).length()-1).equals("	note __"))
-					{
-						doNotWrite=true;
-					}
-				}
-				catch (ArrayIndexOutOfBoundsException e)
-				{
-					//Do nothing
-				}
-			}
-			
-
-			if (ChD.getChannelEnabled())
-			{
-				try{
-					if (ChD.get(ChD.getListSize()-1).substring(1, ChD.get(ChD.getListSize()-1).length()-1).equals("	octave "))
-					{
-						ChD.remove(ChD.getListSize()-1);
-					}
-					else if (ChD.get(ChD.getListSize()-1).substring(1, ChD.get(ChD.getListSize()-1).length()-1).equals("	note __"))
-					{
-						doNotWrite=true;
-					}
-				}
-				catch (ArrayIndexOutOfBoundsException e)
-				{
-					//Do nothing
-				}
-			}
-			
-			if (!doNotWrite)
-			{
-			chanWrite("\n\toctave " + (currentOctave));
-			}
+			ChA.setOctave(currentOctave);
+			ChB.setOctave(currentOctave);
+			ChC.setOctave(currentOctave);
+			ChD.setOctave(currentOctave);
 		}
 		
 		public static int amendStereoPan(String parsedLine, int i)
@@ -862,30 +755,13 @@ public class MML2ASM
 				{
 					break;
 				}
-				charsToSkip++;	
+				charsToSkip++;
 			}
-
-			if (ChA.getLastTempo()!=Integer.parseInt(findTempo) && ChA.getChannelEnabled())
-			{
-			chanWrite("\n\ttempo " + findTempo);
-			ChA.setLastTempo(findTempo);
-			}
-			if (ChB.getLastTempo()!=Integer.parseInt(findTempo) && ChB.getChannelEnabled())
-			{
-			chanWrite("\n\ttempo " + findTempo);
-			ChB.setLastTempo(findTempo);
-			}
-			if (ChC.getLastTempo()!=Integer.parseInt(findTempo) && ChC.getChannelEnabled())
-			{
-			chanWrite("\n\ttempo " + findTempo);
-			ChC.setLastTempo(findTempo);
-			}
-			if (ChD.getLastTempo()!=Integer.parseInt(findTempo) && ChD.getChannelEnabled())
-			{
-			chanWrite("\n\ttempo " + findTempo);
-			ChD.setLastTempo(findTempo);
-			}
-			
+			int intTempo = Integer.parseInt(findTempo);
+			ChA.setTempo(intTempo);
+			ChB.setTempo(intTempo);
+			ChC.setTempo(intTempo);
+			ChD.setTempo(intTempo);
 			return charsToSkip;
 		}
 		
@@ -908,26 +784,10 @@ public class MML2ASM
 				charsToSkip++;	
 			}
 
-			if (ChA.getLastVolume()!=Integer.parseInt(findVol) && ChA.getChannelEnabled())
-			{
-			chanWrite("\n\tvolume " + findVol);
-			ChA.setLastVolume(findVol);
-			}
-			if (ChB.getLastVolume()!=Integer.parseInt(findVol) && ChB.getChannelEnabled())
-			{
-			chanWrite("\n\tvolume " + findVol);
-			ChB.setLastVolume(findVol);
-			}
-			if (ChC.getLastVolume()!=Integer.parseInt(findVol) && ChC.getChannelEnabled())
-			{
-			chanWrite("\n\tvolume " + findVol);
-			ChC.setLastVolume(findVol);
-			}
-			if (ChD.getLastVolume()!=Integer.parseInt(findVol) && ChD.getChannelEnabled())
-			{
-			chanWrite("\n\tvolume " + findVol);
-			ChD.setLastVolume(findVol);
-			}
+			ChA.setVol(findVol);
+			ChB.setVol(findVol);
+			ChC.setVol(findVol);
+			ChD.setVol(findVol);
 			return charsToSkip;
 		}
 		
@@ -1003,8 +863,10 @@ public class MML2ASM
 					break;
 				}
 			}
-			chanWrite("\n\tdutycycle " + findVal);
-			
+			ChA.setDutyWave(findVal);
+			ChB.setDutyWave(findVal);
+			ChC.setDutyWave(findVal);
+			ChD.setDutyWave(findVal);
 			return 1;
 		}
 
@@ -1055,141 +917,30 @@ public class MML2ASM
 			if (ChA.getChannelEnabled())
 			{
 				ChA.add("\nMusic_" + songName + "_LoopStart_Ch1: ;The loop point for this channel");
-				loopA=true;
+				loopSongA=true;
 			}
 			if (ChB.getChannelEnabled())
 			{
 				ChB.add("\nMusic_" + songName + "_LoopStart_Ch2: ;The loop point for this channel");
-				loopB=true;
+				loopSongB=true;
 			}
 			if (ChC.getChannelEnabled())
 			{
 				ChC.add("\nMusic_" + songName + "_LoopStart_Ch3: ;The loop point for this channel");
-				loopC=true;
+				loopSongC=true;
 			}
 			if (ChD.getChannelEnabled())
 			{
 				ChD.add("\nMusic_" + songName + "_LoopStart_Ch4: ;The loop point for this channel");
-				loopD=true;
+				loopSongD=true;
 			}
 		}
 		
 		public static void chanWrite(String input)
 		{
-			int initialLength = input.length();
-			
-			if (loopMode)
-			{
-				map.get(definedLabel).amend(input);
-			}
-			else
-			{
-			if (ChA.getChannelEnabled())
-				{
-				if (input.substring(0, 9).equals("\n\tnote __"))
-					{
-						if (ChA.get(ChA.getListSize()-1).substring(1, ChA.get(ChA.getListSize()-1).length()-1).equals("	octave "))
-						{
-							ChA.remove(ChA.getListSize()-1);
-						}
-					}
-				if (input.contains("_Loop_"))
-				{
-					if (!input.contains("callchannel"))
-					{
-						if (input.charAt(input.length()-1)==':')
-						{
-							input = input.substring(0,initialLength-1) + "_Ch1:";
-						}
-					}
-					else
-					{
-						input = input.substring(0,initialLength) + "_Ch1";
-					}
-				}
-				ChA.add(input);
-				usingChA=true;
-				}
-			if (ChB.getChannelEnabled())
-			{
-				if (input.substring(0, 9).equals("\n\tnote __"))
-					{
-						if (ChB.get(ChB.getListSize()-1).substring(1, ChB.get(ChB.getListSize()-1).length()-1).equals("	octave "))
-						{
-							ChB.remove(ChB.getListSize()-1);
-						}
-					}
-				if (input.contains("_Loop_"))
-				{
-					if (!input.contains("callChannel"))
-					{
-						if (input.charAt(input.length()-1)==':')
-						{
-							input = input.substring(0,initialLength-1) + "_Ch2:";
-						}
-					}
-					else
-					{
-						input = input.substring(0,initialLength) + "_Ch2";
-					}
-				}
-				ChB.add(input);
-				usingChB=true;
-			}
-
-			if (ChC.getChannelEnabled())
-			{
-				if (input.substring(0, 9).equals("\n\tnote __"))
-				{
-					if (ChC.get(ChC.getListSize()-1).substring(1, ChC.get(ChC.getListSize()-1).length()-1).equals("	octave "))
-					{
-						ChC.remove(ChC.getListSize()-1);
-					}
-				}
-				if (input.contains("_Loop_"))
-				{
-					if (!input.contains("callChannel"))
-					{
-						if (input.charAt(input.length()-1)==':')
-						{
-							input = input.substring(0,initialLength-1) + "_Ch3:";
-						}
-					}
-					else
-					{
-						input = input.substring(0,initialLength) + "_Ch3";
-					}
-				}
-				ChC.add(input);
-				usingChC=true;
-			}
-						
-		if (ChD.getChannelEnabled())
-			{
-				if (input.substring(0, 9).equals("\n\tnote __"))
-				{
-					if (ChD.get(ChD.getListSize()-1).substring(1, ChD.get(ChD.getListSize()-1).length()-1).equals("	octave "))
-					{
-						ChD.remove(ChD.getListSize()-1);
-					}
-				}
-				if (input.contains("_Loop_"))
-				{
-					if (!input.contains("callChannel"))
-					{
-						if (input.charAt(input.length()-1)==':')
-						{
-							input = input.substring(0,initialLength-1) + "_Ch4:";
-						}
-					}
-					else
-					{
-						input = input.substring(0,initialLength) + "_Ch4";
-					}
-				}
-				ChD.add(input);
-				usingChD=true;
-			}
+			ChA.chanWrite(input);
+			ChB.chanWrite(input);
+			ChC.chanWrite(input);
+			ChD.chanWrite(input);
 		}
-	}
 }
