@@ -8,11 +8,14 @@ Place your .txt in the folder where you put the .jar. If you don't specify for a
 
 Future plans:
 - Implement vibrato detection
+- Implement proper label looping
+- Implement proper note rhythms
 
 ---
 
-Some useful supplemental tools I recommend:
+Some useful supplemental resources I recommend:
 - http://forums.famitracker.com/viewtopic.php?t=610 (To write your music in FamiTracker and convert it to a readable MIDI, using Namco for the Wave Channel)
 - https://github.com/loveemu/petitemm (To convert the MIDI to MML syntax)
+- http://shauninman.com/assets/downloads/ppmck_guide.html (For PPMCK MML syntax reference, which this conversion tool is based on)
 
 Special thanks to pigdevil2010 for providing info about pokecrystal disassembly's commands and GB noise bank reference.
