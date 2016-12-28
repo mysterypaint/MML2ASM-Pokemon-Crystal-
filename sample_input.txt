@@ -1,8 +1,8 @@
-t134y0 c4 o4 y-1 d4 y1 ;this is a comment.v25 also e+4 b-8 c+2 f-4
-d4  o5 f+3>
-c-4v255
-@wd3
-;@v$10,$12
-b+3 o7 ok <t244
-e4;yay
-e4f4
+;title=TitleScreen
+A @wd1 <<o6 @ve2 v15 y0 L c4 >>o2 d4 > e4^4 >> f4
+AB o4 l16 (wyf)[ d2 y-1 b+4^4 < c4 > e+16 < f-16
+AB c4]2 e4
+AB (syy)[c4d4]5
+AB (wyf)4 (syy)4 (wyf)8
+AB d4
+D @tn3 L @k16 @hc8 @s16 @ho8
